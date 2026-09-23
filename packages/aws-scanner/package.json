@@ -1,0 +1,26 @@
+{
+  "name": "@infra-explorer/aws-scanner",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rimraf dist .turbo *.tsbuildinfo",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sts": "^3.700.0",
+    "@aws-sdk/credential-providers": "^3.700.0",
+    "@infra-explorer/domain": "workspace:*",
+    "@infra-explorer/shared": "workspace:*",
+    "@smithy/types": "^3.7.1"
+  },
+  "devDependencies": {
+    "aws-sdk-client-mock": "^4.1.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
