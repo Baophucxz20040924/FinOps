@@ -1,23 +1,25 @@
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
-import { intEnv, optionalEnv, createLogger } from "@infra-explorer/shared";
+import { createLogger } from "@infra-explorer/shared";
 import { AppModule } from "./app.module";
+import { loadConfig } from "./config";
+import { AllExceptionsFilter } from "./common/all-exceptions.filter";
 
 async function bootstrap(): Promise<void> {
   const logger = createLogger({ base: { app: "api" } });
+  const config = loadConfig();
+
   const app = await NestFactory.create(AppModule, { logger: false });
-
   app.setGlobalPrefix("api/v1");
+  app.useGlobalFilters(new AllExceptionsFilter());
+  app.enableCors({ origin: config.corsOrigins });
+  app.enableShutdownHooks();
 
-  const corsOrigins = optionalEnv("CORS_ORIGINS", "http://localhost:3000")
-    .split(",")
-    .map((o) => o.trim())
-    .filter(Boolean);
-  app.enableCors({ origin: corsOrigins });
-
-  const port = intEnv("API_PORT", 4000);
-  await app.listen(port);
-  logger.info({ port, corsOrigins }, "API listening");
+  await app.listen(config.port);
+  logger.info(
+    { port: config.port, corsOrigins: config.corsOrigins },
+    "API listening",
+  );
 }
 
 bootstrap().catch((err) => {

@@ -1,9 +1,11 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule } from "./config.module";
+import { DbModule } from "./db/db.module";
 import { HealthController } from "./health/health.controller";
+import { AccountsModule } from "./accounts/accounts.module";
 
 @Module({
-  imports: [],
+  imports: [ConfigModule, DbModule, AccountsModule],
   controllers: [HealthController],
-  providers: [],
 })
 export class AppModule {}
