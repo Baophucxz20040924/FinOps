@@ -8,6 +8,20 @@
       "when": 1790128767026,
       "tag": "0000_whole_imperial_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790133449329,
+      "tag": "0001_enable_pg_trgm",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790133482516,
+      "tag": "0002_silly_albert_cleary",
+      "breakpoints": true
     }
   ]
 }
