@@ -9,5 +9,7 @@ export * from "./normalize/tags";
 export * from "./normalize/context";
 export * from "./normalize/ec2.normalize";
 export * from "./normalize/ebs.normalize";
+export * from "./normalize/vpc.normalize";
 export * from "./scanners/ec2.scanner";
 export * from "./scanners/ebs.scanner";
+export * from "./scanners/vpc.scanner";

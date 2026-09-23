@@ -415,6 +415,8 @@ Concurrency: scanners within a region run **concurrently with a per-service sema
 
 ## G. Relationship Engine
 
+> **Implementation note (INFRA-010, refined during design review):** The engine derives edges over the **full live account resource set** (`WHERE account_id = $acct AND is_deleted = false`), NOT `WHERE last_scan_id = scanId`. This is a deliberate deviation from the "once per scan over the new set" wording below, required for correctness: soft-delete is scoped per `(service, region)` and only for services whose scan status was `OK`, so a region-limited or partial-failure scan intentionally keeps other rows live. If the engine derived only over the current scan's rows but pruned account-wide, it would delete still-valid edges (e.g. a us-west-2 scan wiping eu-west-1 edges; a VPC-throttled scan wiping live instance→subnet edges). Deriving over the full live set re-affirms every valid edge to the current scanId before an account-wide prune removes only genuinely-gone edges. A prune-skip guard (empty live set ⇒ no prune) prevents a total-failure build from wiping the graph. External-AWS-id→internal-uuid resolution is keyed by `(accountId, region, externalId)` with a target `service/type` allow-list guard to defend against namespace collisions.
+
 **Decision: relationships are computed once per scan and stored explicitly in `relationships`, not computed dynamically at read time.**
 
 Why:
