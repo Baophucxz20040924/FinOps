@@ -1,0 +1,28 @@
+{
+  "name": "infra-explorer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AWS Infrastructure Explorer — read-only visual overview of AWS infrastructure across accounts and regions",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rimraf node_modules",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:generate": "pnpm --filter @infra-explorer/db db:generate",
+    "db:migrate": "pnpm --filter @infra-explorer/db db:migrate"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "rimraf": "^6.0.1",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  }
+}

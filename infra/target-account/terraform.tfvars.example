@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars and fill in with values from the platform's
+# "Register account" screen. Do NOT commit terraform.tfvars.
+
+control_account_principal_arn = "arn:aws:iam::111111111111:role/InfraExplorerWorkerRole"
+external_id                   = "ie-REPLACE_WITH_GENERATED_VALUE"
+
+# Optional overrides:
+# role_name            = "InfraExplorerReadOnly"
+# aws_region           = "us-east-1"
+# max_session_duration = 3600
+# tags = { Owner = "platform-team" }
