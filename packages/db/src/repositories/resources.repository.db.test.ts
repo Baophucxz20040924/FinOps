@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { sql } from "drizzle-orm";
 import type { NormalizedResource } from "@infra-explorer/domain";
 import { createDb, closeDb, type Database } from "../client";
+import { resolveTestDatabaseUrl } from "../test-support";
 import { accounts } from "../schema/accounts";
 import { scans } from "../schema/scans";
 import { resources } from "../schema/resources";
@@ -10,12 +11,13 @@ import { ResourcesRepository, resourceKey } from "./resources.repository";
 import type { Pool } from "pg";
 
 /**
- * DB-required behavioral tests. Skipped unless DATABASE_URL is set (CI must not
- * need Postgres). Run locally with:
- *   pnpm db:up && DATABASE_URL=postgresql://infra:infra@localhost:5432/infra_explorer pnpm --filter @infra-explorer/db test
- * Assumes migrations have been applied to that database.
+ * DB-required behavioral tests. These TRUNCATE tables, so they run against a
+ * dedicated <name>_test database (never the app DB) — see test-support. Skipped
+ * unless DATABASE_URL is set. Setup: create + migrate the *_test database first
+ * (README testing section).
  */
-const hasDb = Boolean(process.env.DATABASE_URL);
+const testDbUrl = resolveTestDatabaseUrl();
+const hasDb = Boolean(testDbUrl);
 
 describe.skipIf(!hasDb)("ResourcesRepository (DB)", () => {
   let db: Database;
@@ -43,7 +45,7 @@ describe.skipIf(!hasDb)("ResourcesRepository (DB)", () => {
   }
 
   beforeAll(() => {
-    const conn = createDb();
+    const conn = createDb({ connectionString: testDbUrl });
     db = conn.db;
     pool = conn.pool;
     repo = new ResourcesRepository(db);

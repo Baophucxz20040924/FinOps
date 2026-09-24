@@ -186,10 +186,21 @@ pnpm --filter @infra-explorer/db db:seed   # (re)load the demo topology
   helpers) is fixture-tested.
 - **DB-gated integration tests** exercise real Postgres (idempotent upsert, scope-gated
   soft-delete, the relationship engine, the scan orchestrator with mocked AWS). They are
-  **skipped unless `DATABASE_URL` is set**, so CI never needs a database or AWS account:
+  **skipped unless `DATABASE_URL` is set**, so CI never needs a database or AWS account.
+  These tests **truncate tables**, so they run against a dedicated **`<name>_test`**
+  database derived from `DATABASE_URL` (e.g. `infra_explorer` → `infra_explorer_test`) —
+  they never touch the app database. Set it up once, then run:
   ```bash
+  # one-time: create + migrate the test database
+  docker exec infra-explorer-postgres psql -U infra -d infra_explorer \
+    -c "CREATE DATABASE infra_explorer_test"
+  DATABASE_URL="postgresql://infra:infra@127.0.0.1:55432/infra_explorer_test" \
+    pnpm --filter @infra-explorer/db db:migrate
+
+  # run the suite (DB tests auto-target the *_test sibling of DATABASE_URL)
   DATABASE_URL="postgresql://infra:infra@127.0.0.1:55432/infra_explorer" pnpm test
   ```
+  Override the target explicitly with `TEST_DATABASE_URL` if you prefer.
 - CI must never require a real AWS account.
 
 ---

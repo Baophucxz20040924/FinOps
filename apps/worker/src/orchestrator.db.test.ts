@@ -21,13 +21,16 @@ import {
   scans,
   resources,
   relationships,
+  resolveTestDatabaseUrl,
   ScansRepository,
 } from "@infra-explorer/db";
 import { createLogger } from "@infra-explorer/shared";
 import type { Pool } from "pg";
 import { ScanOrchestrator } from "./orchestrator";
 
-const hasDb = Boolean(process.env.DATABASE_URL);
+// TRUNCATES tables → runs against the dedicated <name>_test database, never the app DB.
+const testDbUrl = resolveTestDatabaseUrl();
+const hasDb = Boolean(testDbUrl);
 const ec2Mock = mockClient(EC2Client);
 const AWS_ID = "210000000001"; // distinct from the seed account
 
@@ -54,7 +57,7 @@ describe.skipIf(!hasDb)("ScanOrchestrator (DB, mocked AWS)", () => {
   }
 
   beforeAll(() => {
-    const conn = createDb();
+    const conn = createDb({ connectionString: testDbUrl });
     db = conn.db;
     pool = conn.pool;
   });

@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import {
   createDb,
   closeDb,
+  resolveTestDatabaseUrl,
   type Database,
   accounts,
   scans,
@@ -14,12 +15,12 @@ import type { Pool } from "pg";
 import { createRelationshipEngine } from "./engine";
 
 /**
- * DB-required engine tests. Skipped unless DATABASE_URL is set. Run locally:
- *   pnpm db:up && DATABASE_URL=postgresql://infra:infra@localhost:5432/infra_explorer \
- *     pnpm --filter @infra-explorer/relationship-engine test
- * Assumes migrations have been applied.
+ * DB-required engine tests. These TRUNCATE tables, so they run against a
+ * dedicated <name>_test database (never the app DB). Skipped unless DATABASE_URL
+ * is set; create + migrate the *_test database first (README testing section).
  */
-const hasDb = Boolean(process.env.DATABASE_URL);
+const testDbUrl = resolveTestDatabaseUrl();
+const hasDb = Boolean(testDbUrl);
 
 describe.skipIf(!hasDb)("relationship engine (DB)", () => {
   let db: Database;
@@ -54,7 +55,7 @@ describe.skipIf(!hasDb)("relationship engine (DB)", () => {
   }
 
   beforeAll(() => {
-    const conn = createDb();
+    const conn = createDb({ connectionString: testDbUrl });
     db = conn.db;
     pool = conn.pool;
   });
