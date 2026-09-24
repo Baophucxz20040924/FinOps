@@ -2,6 +2,7 @@ import PgBoss from "pg-boss";
 import { createDb, closeDb } from "@infra-explorer/db";
 import {
   createLogger,
+  loadDotenv,
   requireEnv,
   optionalEnv,
   SCAN_QUEUE,
@@ -14,7 +15,10 @@ import { ScanOrchestrator } from "./orchestrator";
  * and runs the scan pipeline for each. Long-running; one shared DB pool.
  */
 async function main(): Promise<void> {
+  // Load .env before anything reads config or AWS credentials (AWS_PROFILE, etc.).
+  const envPath = loadDotenv();
   const logger = createLogger({ base: { app: "worker" } });
+  if (envPath) logger.info({ envPath }, "Loaded .env");
   const connectionString = requireEnv("DATABASE_URL");
   const awsRegion = optionalEnv("AWS_REGION", "us-east-1");
 

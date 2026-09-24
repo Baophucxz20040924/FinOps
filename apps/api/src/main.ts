@@ -1,12 +1,15 @@
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
-import { createLogger } from "@infra-explorer/shared";
+import { createLogger, loadDotenv } from "@infra-explorer/shared";
 import { AppModule } from "./app.module";
 import { loadConfig } from "./config";
 import { AllExceptionsFilter } from "./common/all-exceptions.filter";
 
 async function bootstrap(): Promise<void> {
+  // Load .env before anything reads config or AWS credentials.
+  const envPath = loadDotenv();
   const logger = createLogger({ base: { app: "api" } });
+  if (envPath) logger.info({ envPath }, "Loaded .env");
   const config = loadConfig();
 
   const app = await NestFactory.create(AppModule, { logger: false });

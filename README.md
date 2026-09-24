@@ -80,23 +80,34 @@ flag later.
 
 ---
 
-## Running the services
+## Configuration (`.env`)
 
-Each service is a workspace package; all backend services read `DATABASE_URL` from the
-environment.
+Copy `.env.example` to a repo-root `.env` (git-ignored). The **API and worker load the
+nearest `.env` on startup** (searching upward from the process directory), so one root
+`.env` is picked up no matter which package you start. Exported shell vars override it.
 
 ```bash
-# API — REST at http://localhost:4000/api/v1 (health: /api/v1/health)
-API_PORT=4000 CORS_ORIGINS=http://localhost:3000 AWS_REGION=us-west-2 \
-  pnpm --filter @infra-explorer/api dev
-
-# Web — Next.js at http://localhost:3000
-NEXT_PUBLIC_API_BASE=http://localhost:4000/api/v1 \
-  pnpm --filter @infra-explorer/web dev
-
-# Worker — consumes scan jobs (only needed for live scans, not demo data)
-AWS_REGION=us-west-2 pnpm --filter @infra-explorer/worker dev
+cp .env.example .env   # then edit
 ```
+
+Key variables: `DATABASE_URL`, `POSTGRES_HOST_PORT`, `AWS_PROFILE` (or `AWS_ACCESS_KEY_ID`
+/`AWS_SECRET_ACCESS_KEY`), `AWS_REGION`, `API_PORT`, `CORS_ORIGINS`. See
+[AWS credentials](#aws-credentials--how-scanning-connects) for what the AWS vars do.
+
+> The Next.js **web** app reads its own `apps/web/.env` (Next convention), not the root
+> one; set `NEXT_PUBLIC_API_BASE` there if you change the API URL (default is fine).
+
+## Running the services
+
+With a root `.env` in place, no inline env vars are needed:
+
+```bash
+pnpm --filter @infra-explorer/api dev      # API   → http://localhost:4000/api/v1
+pnpm --filter @infra-explorer/web dev      # Web   → http://localhost:3000
+pnpm --filter @infra-explorer/worker dev   # Worker (only needed for live scans)
+```
+
+Each service logs `Loaded .env` with the path it used at startup.
 
 ---
 
@@ -127,6 +138,33 @@ AWS_REGION=us-west-2 pnpm --filter @infra-explorer/worker dev
    finishes.
 
 ---
+
+## AWS credentials — how scanning connects
+
+The platform **never stores AWS keys** for the accounts it scans. It uses a two-hop,
+assume-role model:
+
+```text
+Base credentials (the platform's own identity, from the AWS SDK default chain)
+      │  call sts:AssumeRole(RoleArn, ExternalId)
+      ▼
+Target account's read-only role (trusts your identity + the ExternalId)
+      │  returns short-lived temporary credentials (1h)
+      ▼
+Scanners make read-only Describe*/List*/Get* calls
+```
+
+- **Base / source credentials** (needed just to call `AssumeRole`) come from the standard
+  AWS SDK chain in the process that runs the API/worker: `AWS_PROFILE` or
+  `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` (locally, via `.env` or the shell), or the
+  **ECS task role** in production (no keys anywhere). Set these in `.env`.
+- **Target-account credentials** are **not stored** — they're minted per-scan via
+  `AssumeRole` and held in memory only. The DB stores just the role ARN + generated
+  ExternalId.
+- **Local gotcha:** the target role's trust-policy `Principal` must be the identity your
+  base creds resolve to. Run `aws sts get-caller-identity` and use that ARN (the
+  `CONTROL_WORKER_ROLE_ARN` shown on the connect screen is for the *production* worker role
+  and is empty by default).
 
 ## Repository layout
 
