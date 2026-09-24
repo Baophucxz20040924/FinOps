@@ -13,3 +13,4 @@ export * from "./normalize/vpc.normalize";
 export * from "./scanners/ec2.scanner";
 export * from "./scanners/ebs.scanner";
 export * from "./scanners/vpc.scanner";
+export * from "./registry";

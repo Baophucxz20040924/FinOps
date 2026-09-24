@@ -6,6 +6,7 @@ import type {
   Resource,
   ResourceRelationships,
   ResourceSummary,
+  Scan,
 } from "@infra-explorer/domain";
 
 const API_BASE =
@@ -14,6 +15,19 @@ const API_BASE =
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { message?: string };
+    throw new Error(body.message ?? `Request failed: ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+async function post<T>(path: string, payload: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { message?: string };
@@ -72,4 +86,15 @@ export const api = {
 
   cost: (accountId: string): Promise<CostSummary> =>
     get(`/cost${qs({ accountId })}`),
+
+  triggerScan: (
+    accountId: string,
+    regions?: string[],
+  ): Promise<{ scanId: string; status: string }> =>
+    post("/scans", { accountId, regions }),
+
+  scan: (id: string): Promise<Scan> => get(`/scans/${id}`),
+
+  scans: (accountId: string): Promise<Scan[]> =>
+    get(`/scans${qs({ accountId })}`),
 };

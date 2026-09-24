@@ -9,16 +9,23 @@
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "clean": "rimraf dist .turbo *.tsbuildinfo",
-    "test": "echo \"no tests yet\" && exit 0"
+    "test": "vitest run"
   },
   "dependencies": {
+    "@infra-explorer/aws-scanner": "workspace:*",
     "@infra-explorer/db": "workspace:*",
     "@infra-explorer/domain": "workspace:*",
-    "@infra-explorer/shared": "workspace:*"
+    "@infra-explorer/relationship-engine": "workspace:*",
+    "@infra-explorer/shared": "workspace:*",
+    "drizzle-orm": "^0.38.3",
+    "pg-boss": "^10.1.6"
   },
   "devDependencies": {
+    "aws-sdk-client-mock": "^4.1.0",
+    "@aws-sdk/client-ec2": "^3.700.0",
     "rimraf": "^6.0.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }
