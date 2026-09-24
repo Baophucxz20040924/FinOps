@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { useAccount } from "../../lib/account-context";
 import { api } from "../../lib/api";
@@ -16,7 +17,16 @@ export default function OverviewPage(): ReactNode {
   });
 
   if (!selectedAccountId)
-    return <Empty>Register and select an AWS account to begin.</Empty>;
+    return (
+      <Empty>
+        <span>
+          No AWS account connected yet.{" "}
+          <Link href="/accounts" className="font-medium underline">
+            Connect an account →
+          </Link>
+        </span>
+      </Empty>
+    );
   if (isLoading) return <Empty>Loading overview…</Empty>;
   if (error)
     return <Empty>Failed to load overview: {(error as Error).message}</Empty>;

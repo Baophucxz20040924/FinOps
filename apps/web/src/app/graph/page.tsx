@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { useAccount } from "../../lib/account-context";
 import { api } from "../../lib/api";
@@ -26,7 +27,16 @@ export default function GraphPage(): ReactNode {
   });
 
   if (!selectedAccountId)
-    return <Empty>Register and select an AWS account to begin.</Empty>;
+    return (
+      <Empty>
+        <span>
+          No AWS account connected yet.{" "}
+          <Link href="/accounts" className="font-medium underline">
+            Connect an account →
+          </Link>
+        </span>
+      </Empty>
+    );
 
   return (
     <div className="flex h-full flex-col">

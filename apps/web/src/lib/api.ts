@@ -1,5 +1,6 @@
 import type {
   Account,
+  AccountVerificationResult,
   CostSummary,
   Graph,
   Paginated,
@@ -8,6 +9,20 @@ import type {
   ResourceSummary,
   Scan,
 } from "@infra-explorer/domain";
+
+/** Response from POST /accounts — includes the generated ExternalId to trust. */
+export interface RegisterAccountResponse {
+  account: Account;
+  externalId: string;
+  workerRoleArn: string;
+}
+
+export interface CreateAccountInput {
+  displayName: string;
+  awsAccountId: string;
+  roleArn: string;
+  enabledRegions: string[];
+}
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4000/api/v1";
@@ -23,6 +38,17 @@ async function get<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+/** Error carrying the API's structured field errors (from Zod validation). */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly fieldErrors?: Record<string, string[]>,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 async function post<T>(path: string, payload: unknown): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
@@ -30,10 +56,26 @@ async function post<T>(path: string, payload: unknown): Promise<T> {
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as {
+      message?: string;
+      details?: { fieldErrors?: Record<string, string[]> };
+    };
+    throw new ApiError(
+      body.message ?? `Request failed: ${res.status}`,
+      body.details?.fieldErrors,
+    );
+  }
+  // 204 No Content has no body.
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
+
+async function del(path: string): Promise<void> {
+  const res = await fetch(`${API_BASE}${path}`, { method: "DELETE" });
+  if (!res.ok && res.status !== 204) {
     const body = (await res.json().catch(() => ({}))) as { message?: string };
     throw new Error(body.message ?? `Request failed: ${res.status}`);
   }
-  return res.json() as Promise<T>;
 }
 
 function qs(params: Record<string, string | number | undefined>): string {
@@ -55,6 +97,14 @@ export type GraphResponse =
 
 export const api = {
   accounts: (): Promise<Account[]> => get("/accounts"),
+
+  createAccount: (body: CreateAccountInput): Promise<RegisterAccountResponse> =>
+    post("/accounts", body),
+
+  verifyAccount: (id: string): Promise<AccountVerificationResult> =>
+    post(`/accounts/${id}/verify`, {}),
+
+  deleteAccount: (id: string): Promise<void> => del(`/accounts/${id}`),
 
   overview: (accountId: string, region?: string): Promise<OverviewResponse> =>
     get(`/overview${qs({ accountId, region })}`),
