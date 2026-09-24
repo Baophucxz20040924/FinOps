@@ -1,0 +1,24 @@
+{
+  "name": "@infra-explorer/relationship-engine",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rimraf dist .turbo *.tsbuildinfo",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@infra-explorer/db": "workspace:*",
+    "@infra-explorer/domain": "workspace:*",
+    "@infra-explorer/shared": "workspace:*",
+    "drizzle-orm": "^0.38.3"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

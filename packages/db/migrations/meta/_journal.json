@@ -22,6 +22,13 @@
       "when": 1790133482516,
       "tag": "0002_silly_albert_cleary",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790133996586,
+      "tag": "0003_strong_talon",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,8 @@ import type { NormalizedResource } from "@infra-explorer/domain";
 import { createDb, closeDb, type Database } from "../client";
 import { accounts } from "../schema/accounts";
 import { scans } from "../schema/scans";
+import { resources } from "../schema/resources";
+import { relationships } from "../schema/relationships";
 import { ResourcesRepository, resourceKey } from "./resources.repository";
 import type { Pool } from "pg";
 
@@ -52,7 +54,9 @@ describe.skipIf(!hasDb)("ResourcesRepository (DB)", () => {
   });
 
   beforeEach(async () => {
-    // Clean slate (respect FK order).
+    // Clean slate (respect FK order: relationships -> resources -> scans -> accounts).
+    await db.delete(relationships);
+    await db.delete(resources);
     await db.delete(scans);
     await db.delete(accounts);
     const [acc] = await db

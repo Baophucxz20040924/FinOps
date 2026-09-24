@@ -177,6 +177,7 @@ describe("VpcScanner", () => {
     expect(nat.metadata.subnetId).toBe("subnet-1");
     expect(nat.metadata.vpcId).toBe("vpc-1");
     expect(nat.metadata.allocationIds).toEqual(["eipalloc-1"]);
+    expect(nat.metadata.eipRefs).toEqual(["eipalloc-1"]);
 
     const eips = result.resources.filter((r) => r.type === "elastic-ip");
     expect(eips).toHaveLength(2);

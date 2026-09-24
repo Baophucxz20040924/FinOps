@@ -219,6 +219,31 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  packages/relationship-engine:
+    dependencies:
+      '@infra-explorer/db':
+        specifier: workspace:*
+        version: link:../db
+      '@infra-explorer/domain':
+        specifier: workspace:*
+        version: link:../domain
+      '@infra-explorer/shared':
+        specifier: workspace:*
+        version: link:../shared
+      drizzle-orm:
+        specifier: ^0.38.3
+        version: 0.38.4(@types/pg@8.23.1)(@types/react@19.3.0)(pg@8.23.0)(react@19.3.0)
+    devDependencies:
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.1.3
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.4)
+
   packages/shared:
     dependencies:
       pino:

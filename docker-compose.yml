@@ -8,7 +8,9 @@ services:
       POSTGRES_PASSWORD: infra
       POSTGRES_DB: infra_explorer
     ports:
-      - "5432:5432"
+      # Host port is overridable (POSTGRES_HOST_PORT) to avoid clashing with a
+      # local Postgres install already bound to 5432.
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

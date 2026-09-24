@@ -246,6 +246,12 @@ export function normalizeNatGateway(
       connectivityType: nat.ConnectivityType ?? null,
       allocationIds: definedStrings(addresses.map((a) => a.AllocationId)),
       publicIps: definedStrings(addresses.map((a) => a.PublicIp)),
+      // Per-address EIP identifier (AllocationId for VPC EIPs, PublicIp for
+      // classic) — matches the elastic-ip resource's externalId so the
+      // relationship engine resolves NAT→EIP with one exact lookup per address.
+      eipRefs: definedStrings(
+        addresses.map((a) => a.AllocationId ?? a.PublicIp),
+      ),
       associationIds: definedStrings(addresses.map((a) => a.AssociationId)),
       networkInterfaceIds: definedStrings(
         addresses.map((a) => a.NetworkInterfaceId),
